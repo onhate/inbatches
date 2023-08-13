@@ -4,6 +4,8 @@ InBatches is a TypeScript library that provides a convenient way to batch and ex
 controlled manner. This library is especially useful for scenarios where you need to perform multiple asynchronous
 operations efficiently, such as when making network requests or performing database queries.
 
+Heavily inspired by [graphql/dataloader](https://github.com/graphql/dataloader) but better 😜
+
 ## Table of Contents
 
 - [Installation](#installation)
