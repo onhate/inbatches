@@ -1,8 +1,8 @@
 # InBatches (📦📦📦)
 
-InBatches is a TypeScript library that provides a convenient way to batch and execute asynchronous operations in a
-controlled manner. This library is especially useful for scenarios where you need to perform multiple asynchronous
-operations efficiently, such as when making network requests or performing database queries.
+InBatches is a zero-dependency TypeScript library that provides a convenient way to batch and execute asynchronous
+operations in a controlled manner. This library is especially useful for scenarios where you need to perform multiple
+asynchronous operations efficiently, such as when making network requests or performing database queries.
 
 Heavily inspired by [graphql/dataloader](https://github.com/graphql/dataloader) but better 😜
 
@@ -11,11 +11,11 @@ Heavily inspired by [graphql/dataloader](https://github.com/graphql/dataloader) 
 - [Installation](#installation)
 - [Usage](#usage)
     - [Basic Usage](#basic-usage)
-    - [Using the `InBatches` Decorator](#using-the-inbatches-decorator)
+    - [Using the `@InBatches` Decorator](#using-the-inbatches-decorator)
 - [API](#api)
     - [`BatcherOptions`](#batcheroptions)
     - [`Batcher<K, V>` Class](#batcherk-v-class)
-    - [`InBatches<K, V>` Decorator](#inbatchesk-v-decorator)
+    - [`InBatches<K, V>` Decorator](#inbatches-decorator)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -34,11 +34,10 @@ import { Batcher } from 'inbatches';
 
 // Define a class that extends Batcher and implements the `run` method
 class MyBatcher extends Batcher<number, string> {
-  async run(keys: number[]): Promise<string[]> {
+  async run(ids: number[]): Promise<string[]> {
     // Perform asynchronous operations using the keys
-    return await Promise.all(keys.map(async key => {
-      return `Result for key ${key}`;
-    }));
+    // you must return an array of results in the same order as the keys
+    return this.db.getMany(ids);
   }
 }
 
@@ -50,15 +49,15 @@ const resultPromise1 = batcher.enqueue(1);
 const resultPromise2 = batcher.enqueue(2);
 
 resultPromise1.then(result => {
-  console.log(result); // Output: "Result for key 1"
+  console.log(result); // Output: "{ id: 1, name: 'Result for key 1' }"
 });
 
 resultPromise2.then(result => {
-  console.log(result); // Output: "Result for key 2"
+  console.log(result); // Output: "{ id: 2, name: 'Result for key 2' }"
 });
 ```
 
-### Using the `InBatches` Decorator
+### Using the `@InBatches` Decorator
 
 The library also provides a decorator called `InBatches` that you can use to batch-enable methods of your class.
 
@@ -66,17 +65,15 @@ The library also provides a decorator called `InBatches` that you can use to bat
 import { InBatches } from 'inbatches';
 
 class MyService {
-  @InBatches<number, string>()
-  async fetchResults(keys: number | number[]): Promise<string | string[]> {
+  @InBatches()
+  async fetch(keys: number | number[]): Promise<string | string[]> {
     // This method is now batch-enabled
     // Perform asynchronous operations using the keys
     if (Array.isArray(keys)) {
-      return await Promise.all(keys.map(async key => {
-        // Perform some asynchronous operation using `key`
-        return `Result for key ${key}`;
-      }));
+      return this.db.getMany(keys);
     }
 
+    // the Decorator will wrap this method and because of that it will never be called with a single key
     throw new Error('It will never be called with a single key 😉');
   }
 }
@@ -84,15 +81,15 @@ class MyService {
 const service = new MyService();
 
 // Enqueue keys for batching and execution
-const resultPromise1 = service.fetchResults(1);
-const resultPromise2 = service.fetchResults(2);
+const resultPromise1 = service.fetch(1);
+const resultPromise2 = service.fetch(2);
 
 resultPromise1.then(results => {
-  console.log(results); // Output: "Result for key 1"
+  console.log(results); // Output: { id: 1, name: 'Result for key 1' }
 });
 
 resultPromise2.then(results => {
-  console.log(results); // Output: "Result for key 2"
+  console.log(results); // Output: { id: 2, name: 'Result for key 2' }
 });
 ```
 
