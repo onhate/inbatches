@@ -1,4 +1,4 @@
-# InBatches
+# InBatches (📦📦📦)
 
 InBatches is a TypeScript library that provides a convenient way to batch and execute asynchronous operations in a
 controlled manner. This library is especially useful for scenarios where you need to perform multiple asynchronous
