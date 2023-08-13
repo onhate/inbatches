@@ -63,7 +63,7 @@ resultPromise2.then(result => {
 The library also provides a decorator called `InBatches` that you can use to batch-enable methods of your class.
 
 ```typescript
-import { InBatches } from 'batcher';
+import { InBatches } from 'inbatches';
 
 class MyService {
   @InBatches<number, string>()
