@@ -1,11 +1,13 @@
 {
   "name": "inbatches",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "private": false,
   "license": "MIT",
   "repository": {
     "url": "https://github.com/onhate/inbatches.git"
   },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "keywords": [
     "batch operations",
     "batch",
