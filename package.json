@@ -1,6 +1,6 @@
 {
   "name": "inbatches",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "private": false,
   "license": "MIT",
   "repository": {
@@ -21,6 +21,7 @@
   ],
   "scripts": {
     "build": "tsc --project tsconfig-build.json",
+    "prebuild": "npx rimraf dist",
     "prepublish": "npm run build",
     "lint": "eslint \"{src}/**/*.ts\" --fix",
     "test": "jest",
