@@ -1,8 +1,24 @@
 {
   "name": "inbatches",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "private": false,
   "license": "MIT",
+  "repository": {
+    "url": "https://github.com/onhate/inbatches.git"
+  },
+  "keywords": [
+    "batch operations",
+    "batch",
+    "typescript",
+    "decorator",
+    "javascript",
+    "isomorphic",
+    "batches",
+    "performance",
+    "loader",
+    "dataloader",
+    "graphql"
+  ],
   "scripts": {
     "build": "tsc --project tsconfig-build.json",
     "prepublish": "npm run build",
