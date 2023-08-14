@@ -4,16 +4,21 @@ class RunInBatches {
   constructor(private id: string = '') {
   }
 
+
+  async getAll(keys: string): Promise<string>;
+
   @InBatches()
-  async getAll(keys: string | string[]) {
+  async getAll(keys: string | string[]): Promise<string | string[]> {
     if (Array.isArray(keys)) {
       return keys.map((key, index) => `${key}-index-${index}-${this.id}`);
     }
     throw new Error('Should not be called with single key');
   }
 
+  async getCouple(keys: string): Promise<string>;
+
   @InBatches({ maxBatchSize: 2 })
-  async getCouple(keys: string | string[]) {
+  async getCouple(keys: string | string[]): Promise<string | string[]> {
     if (Array.isArray(keys)) {
       return keys.map((key, index) => `${key}-index-${index}-${this.id}`);
     }

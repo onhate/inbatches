@@ -3,7 +3,7 @@ export interface BatcherOptions {
   delayWindowInMs?: number;
 }
 
-interface Execution<K> {
+interface Callback<K> {
   key: K;
   resolve: Function;
   reject: Function;
@@ -12,7 +12,7 @@ interface Execution<K> {
 class Batch<K, V> {
   public active = true;
   public readonly cache = new Map<K, Promise<V>>();
-  public readonly executions: Execution<K>[] = [];
+  public readonly callbacks: Callback<K>[] = [];
 
   append(key: K) {
     if (this.cache.has(key)) {
@@ -20,7 +20,7 @@ class Batch<K, V> {
     }
 
     const promise = new Promise<V>((resolve, reject) => {
-      this.executions.push({ key, resolve, reject });
+      this.callbacks.push({ key, resolve, reject });
     });
 
     this.cache.set(key, promise);
@@ -54,7 +54,7 @@ export abstract class Batcher<K, V> {
   private getCurrentBatch() {
     // if there is a current batch, and it has not been dispatched, and it is not full
     if (this.current) {
-      if (this.current.active && this.current.executions.length < this.options.maxBatchSize) {
+      if (this.current.active && this.current.callbacks.length < this.options.maxBatchSize) {
         return this.current;
       }
     }
@@ -82,12 +82,12 @@ export abstract class Batcher<K, V> {
   private dispatch(batch: Batch<K, V>) {
     batch.active = false;
 
-    if (batch.executions.length === 0) {
+    if (batch.callbacks.length === 0) {
       return;
     }
 
     try {
-      this.run(batch.executions.map(callback => callback.key))
+      this.run(batch.callbacks.map(callback => callback.key))
         .then(values => this.fulfill(batch, values))
         .catch(error => this.reject(batch, error));
     } catch (error) {
@@ -96,7 +96,7 @@ export abstract class Batcher<K, V> {
   }
 
   private fulfill(batch: Batch<K, V>, values: (V | Error)[]) {
-    batch.executions.forEach((callback, index) => {
+    batch.callbacks.forEach((callback, index) => {
       const value = values[index];
       if (value instanceof Error) callback.reject(value);
       else callback.resolve(value);
@@ -104,7 +104,7 @@ export abstract class Batcher<K, V> {
   }
 
   private reject(batch: Batch<K, V>, error: Error) {
-    batch.executions.forEach(callback => {
+    batch.callbacks.forEach(callback => {
       callback.reject(error);
     });
   }
