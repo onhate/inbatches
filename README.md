@@ -1,4 +1,4 @@
-# InBatches (📦📦📦)
+# @InBatches(📦,📦,📦,...)
 
 InBatches is a zero-dependency generic TypeScript library that provides a convenient way to batch executions that runs
 asynchronous.
