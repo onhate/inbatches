@@ -4,7 +4,6 @@ class RunInBatches {
   constructor(private id: string = '') {
   }
 
-
   async getAll(keys: string): Promise<string>;
 
   @InBatches()

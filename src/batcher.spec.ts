@@ -1,6 +1,6 @@
 import { Batcher, BatcherOptions } from './batcher';
 
-class BatcherSpec extends Batcher<string, string> {
+class RunInBatches extends Batcher<string, string> {
   constructor(options?: BatcherOptions) {
     super(options);
   }
@@ -16,7 +16,7 @@ class BatcherSpec extends Batcher<string, string> {
 
 describe('Batcher', () => {
   it('should call run in batch', async () => {
-    const batcher = new BatcherSpec();
+    const batcher = new RunInBatches();
 
     const promises = ['a', 'b', 'c'].map(key => {
       return batcher.enqueue(key);
@@ -27,7 +27,7 @@ describe('Batcher', () => {
   });
 
   it('should call run in batch with max size', async () => {
-    const batcher = new BatcherSpec({ maxBatchSize: 2 });
+    const batcher = new RunInBatches({ maxBatchSize: 2 });
 
     const promises = ['batch1.1', 'batch1.2', 'batch2.1', 'batch2.2'].map(key => {
       return batcher.enqueue(key);
@@ -38,7 +38,7 @@ describe('Batcher', () => {
   });
 
   it('should call run method with unique keys if duplicates', async () => {
-    const batcher = new BatcherSpec();
+    const batcher = new RunInBatches();
 
     const promises = ['a', 'b', 'a', 'c'].map(key => {
       return batcher.enqueue(key);
@@ -49,7 +49,7 @@ describe('Batcher', () => {
   });
 
   it('should reject all with same error when run method failed', async () => {
-    const batcher = new BatcherSpec();
+    const batcher = new RunInBatches();
 
     const promises = ['a', 'throw', 'c'].map(key => {
       return batcher.enqueue(key);
@@ -63,7 +63,7 @@ describe('Batcher', () => {
   });
 
   it('should reject single with returned error when returning error', async () => {
-    const batcher = new BatcherSpec();
+    const batcher = new RunInBatches();
 
     const promises = ['a', 'error', 'c'].map(key => {
       return batcher.enqueue(key);
@@ -76,7 +76,7 @@ describe('Batcher', () => {
   });
 
   it('should call in batches with delay', cb => {
-    const batcher = new BatcherSpec({ delayWindowInMs: 100 });
+    const batcher = new RunInBatches({ delayWindowInMs: 100 });
 
     const promises = ['a', 'b', 'c'].map(key => {
       return batcher.enqueue(key);
