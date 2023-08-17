@@ -16,22 +16,28 @@ class MethodBatcher<I, K, V> extends Batcher<K, V> {
   }
 }
 
-function getInstanceBatcher<K, V>(self: any, property: string, fn: Method<K, V>, options?: BatcherOptions) {
-  const bkey = `${property}_____batcher`;
+// this Symbol is used to store the MethodBatcher instances in the instance of the class that is using the decorator
+// this way we can have a unique batcher for each instance and method of the class decorated with @InBatches
+const holder = Symbol('__inbatches__');
 
-  // check if the instance already has a batcher for this method
-  if (self[bkey]) return self[bkey];
+function getInstanceBatcher<I, K, V>(instance: I, property: string, descriptor: Method<K, V>, options?: BatcherOptions) {
+  // check if the instance already has a holder for all the batchers in the class
+  instance[holder] = instance[holder] ?? new Map<string, MethodBatcher<I, K, V>>();
 
-  // otherwise, create a new batcher and store it in the instance so it is unique for that instance
-  self[bkey] = new MethodBatcher(self, fn, options);
-  return self[bkey];
+  // check if the instance already has a method matcher for this specific method
+  if (instance[holder].has(property)) return instance[holder].get(property);
+
+  // otherwise, create a new batcher and store it in the instance batchers holder
+  const batcher = new MethodBatcher<I, K, V>(instance, descriptor, options);
+  instance[holder].set(property, batcher);
+  return batcher;
 }
 
 export function InBatches<K, V>(options?: BatcherOptions) {
   return function (_: any, property: string, descriptor: PropertyDescriptor) {
-    const fn = descriptor.value;
+    const method = descriptor.value;
     descriptor.value = function (...args: any[]) {
-      const batcher = getInstanceBatcher<K, V>(this, property, fn, options);
+      const batcher = getInstanceBatcher<any, K, V>(this, property, method, options);
       return batcher.enqueue(args);
     };
 

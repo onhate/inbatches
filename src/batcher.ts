@@ -11,19 +11,19 @@ interface Callback<K> {
 
 class Batch<K, V> {
   public active = true;
-  public readonly cache = new Map<K, Promise<V>>();
+  public readonly uniques = new Map<K, Promise<V>>();
   public readonly callbacks: Callback<K>[] = [];
 
   append(key: K) {
-    if (this.cache.has(key)) {
-      return this.cache.get(key);
+    if (this.uniques.has(key)) {
+      return this.uniques.get(key);
     }
 
     const promise = new Promise<V>((resolve, reject) => {
       this.callbacks.push({ key, resolve, reject });
     });
 
-    this.cache.set(key, promise);
+    this.uniques.set(key, promise);
     return promise;
   }
 }
