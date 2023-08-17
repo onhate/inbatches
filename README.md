@@ -9,7 +9,9 @@ backends and reduce requests to those backends via batching.
 This library is especially useful for scenarios where you need to perform multiple asynchronous operations efficiently,
 such as when making network requests or performing database queries.
 
-Heavily inspired by [graphql/dataloader](https://github.com/graphql/dataloader) but using classes and decorators 😜
+Heavily inspired by [graphql/dataloader](https://github.com/graphql/dataloader) but simpler using decorators (😜 really
+decoupled). Because of that the
+rest of your application doesn't event need to know about the batching/dataloader, it just works!
 
 ## Table of Contents
 
@@ -28,6 +30,12 @@ Heavily inspired by [graphql/dataloader](https://github.com/graphql/dataloader) 
 npm install inbatches
 ```
 
+or
+
+```bash
+yarn add inbatches
+```
+
 ## Usage
 
 ### Basic usage with `@InBatches` Decorator
@@ -35,20 +43,18 @@ npm install inbatches
 The simplest way to get the grown running is to use the `@InBatches` decorator. This decorator will wrap your method
 and will batch-enable it, like magic! 🧙‍♂️
 
-All you need is to decorate your method with `@InBatches` and the library will take care of the rest.
-
 ```typescript
 import { InBatches } from 'inbatches';
 
 class MyService {
 
-  // (optional) overloaded method, where you define the keys as `number` and the return type as `string` for typings
+  // (optional) overloaded method, where you define the keys as `number` and the return type as `User` for typings
   async fetch(key: number): Promise<User>;
 
   // This method is now batch-enabled
   @InBatches()
   async fetch(keys: number | number[]): Promise<User | User[]> {
-    if (Array.isArray(keys)) return this.db.getMany(keys);
+    if (Array.isArray(keys)) return await this.db.getMany(keys);
 
     // in reality the Decorator will wrap this method and it will never be called with a single key :)
     throw new Error('It will never be called with a single key 😉');
@@ -79,8 +85,7 @@ This class will provide a `enqueue` method that you can use to enqueue keys for 
 ```typescript
 import { Batcher } from 'inbatches';
 
-// Define a class that extends Batcher and implements the `run` method
-// the `run` method will be called with an array of keys collected from the `enqueue` method
+// The `run` method will be called with an array of keys collected from the `enqueue` method
 class MyBatcher extends Batcher<number, string> {
   async run(ids: number[]): Promise<string[]> {
     // Perform asynchronous operations using the keys
@@ -88,7 +93,11 @@ class MyBatcher extends Batcher<number, string> {
     return this.db.getMany(ids);
   }
 }
+```
 
+then
+
+```typescript
 // Create an instance of your batcher
 const batcher = new MyBatcher();
 
