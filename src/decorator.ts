@@ -25,7 +25,7 @@ function getInstanceBatcher<I, K, V>(instance: I, property: string, descriptor: 
   instance[holder] = instance[holder] ?? new Map<string, MethodBatcher<I, K, V>>();
 
   // check if the instance already has a method matcher for this specific method
-  if (instance[holder].has(property)) return instance[holder].get(property);
+  if (instance[holder].has(property)) return instance[holder].get(property) as MethodBatcher<I, K, V>;
 
   // otherwise, create a new batcher and store it in the instance batchers holder
   const batcher = new MethodBatcher<I, K, V>(instance, descriptor, options);
@@ -36,9 +36,9 @@ function getInstanceBatcher<I, K, V>(instance: I, property: string, descriptor: 
 export function InBatches<K, V>(options?: BatcherOptions) {
   return function (_: any, property: string, descriptor: PropertyDescriptor) {
     const method = descriptor.value;
-    descriptor.value = function (...args: any[]) {
+    descriptor.value = function (key: K) {
       const batcher = getInstanceBatcher<any, K, V>(this, property, method, options);
-      return batcher.enqueue(args);
+      return batcher.enqueue(key);
     };
 
     return descriptor;
