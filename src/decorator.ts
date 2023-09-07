@@ -38,6 +38,9 @@ export function InBatches<K, V>(options?: BatcherOptions) {
     const method = descriptor.value;
     descriptor.value = function (key: K) {
       const batcher = getInstanceBatcher<any, K, V>(this, property, method, options);
+      if (Array.isArray(key)) {
+        return Promise.all(key.map(each => batcher.enqueue(each)));
+      }
       return batcher.enqueue(key);
     };
 

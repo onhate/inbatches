@@ -5,6 +5,7 @@ class RunInBatches {
   }
 
   async getAll(keys: string): Promise<string>;
+  async getAll(keys: string[]): Promise<string[]>;
 
   @InBatches()
   async getAll(keys: string | string[]): Promise<string | string[]> {
@@ -65,5 +66,27 @@ describe('Batch Decorator', () => {
 
     const values = await Promise.all(promises);
     expect(values).toEqual(['batch1.1-index-0-i1', 'batch1.2-index-1-i1', 'batch2-index-0-i1']);
+  });
+
+  it('should also work when passing array of keys to batch enabled method', async () => {
+    const runner = new RunInBatches('i1');
+
+    const values = await runner.getAll(['a', 'b', 'c']);
+    expect(values).toEqual(['a-index-0-i1', 'b-index-1-i1', 'c-index-2-i1']);
+  });
+
+  it('should also work when passing array of keys to batch enabled method (multiple batches)', async () => {
+    const runner = new RunInBatches('i1');
+
+    const keys = Array.from({ length: 50 }, (_, i) => 'key-' + i);
+    const values = await runner.getAll(keys);
+
+    expect(values).toHaveLength(50);
+    // batch 1 of 25 items
+    expect(values).toContain('key-0-index-0-i1');
+    expect(values).toContain('key-24-index-24-i1');
+    // batch 2 of 25 items
+    expect(values).toContain('key-25-index-0-i1');
+    expect(values).toContain('key-49-index-24-i1');
   });
 });
