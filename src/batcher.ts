@@ -28,12 +28,15 @@ class Batch<K, V> {
   }
 }
 
-const isomorphicNextTick =
-  typeof window !== 'undefined' && window.document
+const isBrowser = typeof window !== 'undefined' && !!window.document;
+const isNode = typeof process !== 'undefined' && !!process.nextTick;
+const isomorphicNextTick = isNode
+  ? process.nextTick
+  : isBrowser
     ? typeof setImmediate !== 'undefined'
       ? setImmediate
       : setTimeout
-    : eval('process.nextTick');
+    : undefined
 
 const defaultOptions: BatcherOptions = { maxBatchSize: 25 };
 
